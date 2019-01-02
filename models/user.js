@@ -37,35 +37,8 @@ module.exports.createUser = function(newUser, callback) {
                 console.log(err);
             }
             newUser.password = hash;
-
-            // before saving the user, need to check if the user already exits, for some reason the pre function doesn't work so create my own  
-            checkDuplicate(newUser, function(err, user) {
-                if(err)
-                    console.log(err);
-
-                if(user) {
-                    console.log('Email already exists: ');
-                }
-
-                newUser.save(callback);
-            });
+            newUser.save(callback);
            
         });
     });
 }
-
-function checkDuplicate(newUser, callback) {
-    console.log('Checking if this user already exists -> ' + newUser.username);
-    User.find({email: newUser.email}, function(err, user) {
-        if(err) {
-            console.log(err);
-        }
-        else if(user) {
-            console.log('Email already exists: ', newUser.email);
-        }
-        else {
-            console.log('Creating user -> ' + newUser);
-        }
-    });
-}
-
