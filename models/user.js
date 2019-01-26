@@ -1,5 +1,7 @@
 var mongoose = require('mongoose');
+var passportLocalMongoose = require('passport-local-mongoose');
 var bcrypt = require('bcryptjs');
+
 
 var UserSchema = mongoose.Schema({
     firstName: {
@@ -18,27 +20,13 @@ var UserSchema = mongoose.Schema({
         type: String,
         required: true
     },
-    password: {
-        type: String,
-        required: true
-    }
+    password: String
 });
+
+
+var options = ({missingPasswordError: "Wrong password"});
+UserSchema.plugin(passportLocalMongoose, options);
+
 
 var User = module.exports = mongoose.model('User', UserSchema);
 
-// function to create a new user and hash the password
-module.exports.createUser = function(newUser, callback) {
-    bcrypt.genSalt(10, function(err, salt) {
-        if(err) {
-            console.log(err);
-        }
-        bcrypt.hash(newUser.password, salt, function(err, hash) {
-            if(err) {
-                console.log(err);
-            }
-            newUser.password = hash;
-            newUser.save(callback);
-           
-        });
-    });
-}

@@ -1,28 +1,54 @@
 var User = require('../models/user');
 var bcrypt = require('bcryptjs');
+var mongoose = require('mongoose');
 
-// create a user
-exports.create = function(req, res) {
-    var newUser = new User ({
+// create a user 
+// NEED TO HASH THE PASSWORD ON THE DB
+exports.register = function(req, res) {
+    User.register(new User ({
         firstName: req.body.firstName,
         lastName: req.body.lastName,
         email: req.body.email,
         username: req.body.username,
         password: req.body.password
-    });
-
-    console.log('User being passed from the front end is -> \n' + newUser);
-
-    User.createUser(newUser, function(err, user) {
+        
+    }), req.body.password, function(err, user) {
         if(err) {
             console.log(err);
-            res.status(400).send('Failed to register User');
+            res.send(err);
         }
         else {
-            res.status(200).send('Successfully created User ' + user);
+            //res.status(200).send('Successfully created User');
+            res.send({
+                success: true,
+                user: user
+            });
         }
     });
-}
+};
+
+exports.login = function(req, res, next) {
+    User.authenticate()(req.body.username, req.body.password, function(err, user, options) {
+        if(err)
+            return next(err);
+
+        if(user === false) {
+            res.send({
+                message: options.message,
+                success: false
+            });
+        }
+        else {
+            req.login(user, function(err) {
+                res.send({
+                    success: true,
+                    user: user
+                });
+            });
+        }
+    });
+};
+
 
 exports.findAllUsers = function(req, res) {
     User.find({}, function (err, user) {
@@ -64,6 +90,7 @@ exports.findUserByIdAndDelete = function(req, res) {
     });
 }
 
+// need to work on update
 exports.findUserByIdAndUpdate = function(req, res) {
     // need to hash the password before updating it
     bcrypt.genSalt(10, function(err, salt) {
@@ -84,10 +111,6 @@ exports.findUserByIdAndUpdate = function(req, res) {
             });
         });
     });
-}
-
-exports.validateLoginCredentials = function(req, res) {
-    
 }
 
 findUserByEmail = function(req, callback) {
