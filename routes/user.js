@@ -9,11 +9,12 @@ var session = require('express-session');
 
 module.exports = function(app) {
     //var users = require('../controller/user');
-     //initialize passport
-     passport.use(User.createStrategy());
-     // use static serialize and deserialize of model for passport session support
-     passport.serializeUser(User.serializeUser());
-     passport.deserializeUser(User.deserializeUser());
+    
+    //initialize passport
+    passport.use(User.createStrategy());
+    // use static serialize and deserialize of model for passport session support
+    passport.serializeUser(User.serializeUser());
+    passport.deserializeUser(User.deserializeUser());
 
     //need this according to passport guide for sessions
     app.use(cookieParser());
@@ -38,7 +39,7 @@ module.exports = function(app) {
     app.delete('/users/:id', users.findUserByIdAndDelete);
 
     // update a user by id
-    app.post('/users/update/:id', users.findUserByIdAndUpdate); // need to work on update
+    app.post('/users/update/:id', users.findUserByIdAndUpdate);
 
     // validate login credentials
     app.post('/login', users.login);

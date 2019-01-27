@@ -1,9 +1,10 @@
 var User = require('../models/user');
+// remove these 3
 var bcrypt = require('bcryptjs');
-var mongoose = require('mongoose');
+var crypto = require('crypto');
+var passport = require('../config/passport');
 
 // create a user 
-// NEED TO HASH THE PASSWORD ON THE DB
 exports.register = function(req, res) {
     User.register(new User ({
         firstName: req.body.firstName,
@@ -49,7 +50,6 @@ exports.login = function(req, res, next) {
     });
 };
 
-
 exports.findAllUsers = function(req, res) {
     User.find({}, function (err, user) {
         console.log('All Users:');
@@ -90,27 +90,22 @@ exports.findUserByIdAndDelete = function(req, res) {
     });
 }
 
-// need to work on update
+// doesn't update the hashed password correctly
 exports.findUserByIdAndUpdate = function(req, res) {
-    // need to hash the password before updating it
-    bcrypt.genSalt(10, function(err, salt) {
-        if(err)
-            console.log(err);
-    
-        bcrypt.hash(req.body.password, salt, function(err, hash) {
-            if(err)
-                console.log(err);
-            
-            req.body.password = hash;
+    User.findById(req.params.id, function(err, user) {
+        user.setPassword(req.body.password, function() {
+            user.firstName = req.body.firstName;
+            user.lastName = req.body.lastName;
+            user.email = req.body.email;
+            user.username = req.body.username;
+            user.password = req.body.password;
 
-            User.findByIdAndUpdate(req.params.id, req.body, function(err, user) {
-                if(err)
-                    res.status(500).send(err);
-            
+            user.save(function(err) {
                 res.status(200).send('Successfully Updated!');
             });
-        });
-    });
+        })
+
+    }); 
 }
 
 findUserByEmail = function(req, callback) {
