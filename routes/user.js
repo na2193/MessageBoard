@@ -43,4 +43,22 @@ module.exports = function(app) {
 
     // validate login credentials
     app.post('/login', users.login);
+
+    // go to the dashboard page only for authenticated users
+    app.get('/dashboard', users.checkAuthentication, users.findAllUsers); // remove users.findAllUsers just testing 
+
+    // logout
+    app.get('/logout', function(req, res){
+        req.logout();
+        res.redirect('/login'); // probably update this 
+    });
+
+    // get user profile and pre-populate the fields with the ones in the database, useranme is not editable
+    app.get('/userProfile', users.checkAuthentication, users.findUserBySession);
+    
+    // update the user except username
+    app.post('/userProfile/update', users.checkAuthentication, users.updateUserProfileBySession);
+
+    // request to delete account
+    app.post('/userProfile/delete', users.checkAuthentication, users.deleteUserAccount);
 }

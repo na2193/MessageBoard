@@ -1,7 +1,7 @@
 var LocalStrategy = require('passport-local').Strategy;
 var User = require('../models/user');
 
-// don't know if this is going to work
+// might be working
 
 module.exports = function(passport) {
     // serialize the user for the session 
@@ -97,13 +97,16 @@ module.exports = function(passport) {
         };
     };
 
-    
     function saltHashPassword(userpassword) {
         var salt = genRandomString(16); /** Gives us salt of length 16 */
         var passwordData = sha512(userpassword, salt);
         console.log('UserPassword = '+userpassword);
         console.log('Passwordhash = '+passwordData.passwordHash);
         console.log('nSalt = '+passwordData.salt);
+    }
+
+    function authenticate() {
+        
     }
 }
 
