@@ -1,32 +1,83 @@
 var User = require('../models/user');
+var validator = require('validator');
+ 
 // remove these 3
-var bcrypt = require('bcryptjs');
-var crypto = require('crypto');
-var passport = require('../config/passport');
+//var bcrypt = require('bcryptjs');
+//var crypto = require('crypto');
+//var passport = require('../config/passport');
+
+// validating the fields for registration
+function registrationValidation(email, password, username, firstName, lastName) {
+    var errMessage = [];
+    var keepValidating = true;
+    if(keepValidating) {
+        if(!validator.isAlpha(firstName)) {
+            errMessage.push('Invalid First Name Criteria, numbers and special characters are not allowed');
+            keepValidating = true;
+        }
+
+        if(!validator.isAlpha(lastName)) {
+            errMessage.push('Invalid Last Name Criteria, numbers and special characters are not allowed');
+            keepValidating = true;
+        }
+
+        if(!validator.isEmail(email)) {
+            errMessage.push('Invalid Email Address');
+            keepValidating = true;
+        }
+
+        if(!validator.isAlphanumeric(password)) {
+            errMessage.push('Invalid Password Criteria, only Alphanumeric');
+            keepValidating = true;
+        }
+
+        if(!validator.isLength(password, {min: 5, max: 15})) {
+            errMessage.push('Invalid Password Length, Range is between 5 and 5 characters');
+            keepValidating = true;
+        }
+
+        if(!validator.isAlphanumeric(username)) {
+            errMessage.push('Invalid Username Criteria, only Alphanumeric');
+            keepValidating = true;
+        }
+
+        if(!validator.isLength(username, {min: 5, max: 10})) {
+            errMessage.push('Invalid Username Length, Range is between 5 and 10 characters');
+            keepValidating = true;
+        }
+    }
+    return errMessage;
+}
 
 // create a user 
 exports.register = function(req, res) {
-    User.register(new User ({
-        firstName: req.body.firstName,
-        lastName: req.body.lastName,
-        email: req.body.email,
-        username: req.body.username,
-        password: req.body.password
-        
-    }), req.body.password, function(err, user) {
-        if(err) {
-            console.log(err);
-            res.send(err);
-        }
-        else {
-            //res.status(200).send('Successfully created User');
-            res.send({
-                success: true,
-                user: user
-            });
-        }
-    });
-};
+    var errMessage = registrationValidation(req.body.email, req.body.password, req.body.username, req.body.firstName, req.body.lastName);
+    if(errMessage.length != 0) {
+        console.log(errMessage);
+        res.status(406).send(errMessage);
+    }
+    else {
+        User.register(new User ({
+            firstName: req.body.firstName,
+            lastName: req.body.lastName,
+            email: req.body.email,
+            username: req.body.username,
+            password: req.body.password
+        }), req.body.password, function(err, user) {
+            if(err) {
+                console.log(err);
+                res.status(500).send(err);
+            }
+            else {
+                //res.status(200).send('Successfully created User');
+                res.status(200).send({
+                    success: true,
+                    user: user
+                });
+            }
+        });
+    }
+}
 
 exports.login = function(req, res, next) {
     User.authenticate()(req.body.username, req.body.password, function(err, user, options) {
@@ -61,6 +112,7 @@ exports.checkAuthentication = function(req, res, next) {
     }
 }
 
+// these generic final All users, find by id, etc will be move to admin js file where the admin can search for these users, no point of having them here
 exports.findAllUsers = function(req, res) {
     User.find({}, function (err, user) {
         console.log('All Users:');

@@ -1,9 +1,9 @@
-var mongoose = require('mongoose');
+//var mongoose = require('mongoose');
 var User = require('../models/user');
 
 var users = require('../controller/user');
 var passport = require('passport');
-var LocalStrategy = require('passport-local').Strategy;
+//var LocalStrategy = require('passport-local').Strategy;
 var cookieParser = require('cookie-parser');
 var session = require('express-session');
 

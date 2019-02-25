@@ -19,7 +19,8 @@ var UserSchema = mongoose.Schema({
         type: String,
         required: true
     },
-    password: String
+    password: String,
+    isAdmin: Boolean // need to modify everything and test it
 });
 
 // need these to bottom functions to hash the password
