@@ -29,28 +29,23 @@ module.exports = function(app) {
     // create a new user
     app.post('/register', users.register);
 
-    // get all users
-    app.get('/users', users.findAllUsers);
-
-    // get user by id
-    app.get('/users/:id', users.findUserById);
-
-    // delete user by id
-    app.delete('/users/:id', users.findUserByIdAndDelete);
-
-    // update a user by id
-    app.post('/users/update/:id', users.findUserByIdAndUpdate);
+    
 
     // validate login credentials
     app.post('/login', users.login);
 
     // go to the dashboard page only for authenticated users
-    app.get('/dashboard', users.checkAuthentication, users.findAllUsers); // remove users.findAllUsers just testing 
+    //app.get('/dashboard', users.checkAuthentication, users.findAllUsers); // remove users.findAllUsers just testing 
 
     // logout
     app.get('/logout', function(req, res){
         req.logout();
-        res.redirect('/login'); // probably update this 
+        res.send({
+            success: true,
+            message: 'User has Logged Out Succesfully!'
+        });
+        // NEED to update to bottom instead of send
+        //res.redirect('/login'); 
     });
 
     // get user profile and pre-populate the fields with the ones in the database, useranme is not editable

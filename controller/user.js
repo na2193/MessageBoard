@@ -1,6 +1,5 @@
 var User = require('../models/user');
 var validator = require('validator');
- 
 // remove these 3
 //var bcrypt = require('bcryptjs');
 //var crypto = require('crypto');
@@ -62,7 +61,8 @@ exports.register = function(req, res) {
             lastName: req.body.lastName,
             email: req.body.email,
             username: req.body.username,
-            password: req.body.password
+            password: req.body.password,
+            isAdmin: req.body.isAdmin
         }), req.body.password, function(err, user) {
             if(err) {
                 console.log(err);
@@ -92,10 +92,25 @@ exports.login = function(req, res, next) {
         }
         else {
             req.login(user, function(err) {
-                res.send({
-                    success: true,
-                    user: user
-                });
+                if(err) {
+                    res.status(500).send(err);
+                }
+                if(user.isAdmin) {
+                     res.send({
+                         success: true,
+                         user: user,
+                         message: 'ADMIN HAS LOGGED IN!'
+                     });
+                     // use the bottom and update everything to like this when starting the front end part
+                   // req.flash('adminMessage', 'ADMIN HAS LOGGED IN SUCCESSFULLY!');
+                   // res.redirect('/dashboard');
+                }
+                else {
+                    res.send({
+                        success: true,
+                        user: user
+                    });
+                }
             });
         }
     });
@@ -108,68 +123,15 @@ exports.checkAuthentication = function(req, res, next) {
     }
     else {
         console.log('User is NOT authenticated');
-        res.redirect('/login');
+        res.send({
+            success: false,
+            message: 'User is NOT authenticated'
+        });
+        //res.redirect('/login');
     }
 }
 
-// these generic final All users, find by id, etc will be move to admin js file where the admin can search for these users, no point of having them here
-exports.findAllUsers = function(req, res) {
-    User.find({}, function (err, user) {
-        console.log('All Users:');
-        console.log(user);
-        res.send(user);
-    });
-}
-
-exports.findUserById = function(req, res) {
-    User.findById(req.params.id, function(err, user) {
-        if(err) {
-            console.log(err);
-        }
-        if(!user) {
-            console.log('Cannot find User with id -> ' + req.params.id);
-            res.send('Cannot find User with id -> ' + req.params.id);
-        }
-        else {
-            console.log('Found User with id -> ' + req.params.id);
-            res.send(user);
-        }
-    });
-}
-
-exports.findUserByIdAndDelete = function(req, res) {
-    User.findByIdAndRemove(req.params.id, function(err, user) {
-        if(err) {
-            console.log(err);
-        }
-        if(!user) {
-            console.log('Cannot find User with id -> ' + req.params.id);
-            res.send('Cannot find User with id -> ' + req.params.id);
-        }
-        else {
-            console.log('Found User with id -> ' + req.params.id);
-            res.send('Deleted User -> \n' + user + ' \nSuccessfully!');
-        }
-    });
-}
-
-// doesn't update the hashed password correctly
-exports.findUserByIdAndUpdate = function(req, res) {
-    User.findById(req.params.id, function(err, user) {
-        user.setPassword(req.body.password, function() {
-            user.firstName = req.body.firstName;
-            user.lastName = req.body.lastName;
-            user.email = req.body.email;
-            user.username = req.body.username;
-            user.password = req.body.password;
-
-            user.save(function(err) {
-                res.status(200).send('Successfully Updated!');
-            });
-        })
-    }); 
-}
-
+// most likely don't need this function
 findUserByEmail = function(req, callback) {
     User.find({email: req.body.email}, function(err, user) {
         if(err)
